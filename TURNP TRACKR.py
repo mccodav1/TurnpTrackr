@@ -522,7 +522,7 @@ def main():
     sender.status = modes[mode]
 
     # parse loop
-    first = True
+    firstCheck = True
     if sender.status == 'SELLER':
         receiver.name = input("\nWhat is your in-game name?")
         sender.minOrMax = 'minimum'
@@ -552,7 +552,7 @@ def main():
                                         submission.selftext,
                                         submission.created)
                             new = True
-                            if not first:
+                            if not firstCheck:
                                 try:
                                     print(f"\n\n\nCreated: {post.created}\tTitle: {post.title}\t\t\t\t\t\t\t"
                                           f"ID: {post.id}\t"
@@ -566,9 +566,9 @@ def main():
                                     time.sleep(15)
                                     startTime = time.time()
                                     sender.sendMail(receiver, post)
-            if first:
+            if firstCheck:
                 print("\nParser initialized.\n")
-                first = False
+                firstCheck = False
                 startTime = time.time()
 
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
