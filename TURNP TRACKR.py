@@ -25,6 +25,7 @@ GMAIL_DEFAULT_SMTP_ADDRESS = "smtp.gmail.com"
 class Person:
     def __init__(self, email):
         self._email = email
+        self.name = None
 
     @property
     def email(self):
@@ -33,14 +34,6 @@ class Person:
     @email.setter
     def email(self, email):
         self._email = email
-
-    @property
-    def name(self):
-        return self._name
-
-    @email.setter
-    def name(self, name):
-        self._name = name
 
 
 class Sender(Person):
@@ -62,6 +55,8 @@ class Sender(Person):
         self.apiPw = None
         self.apiApp = None
         self.apiSubreddit = None
+        self._limit = None
+        self._content = None
 
         if port:
             self._sslPort = int(port)
@@ -335,7 +330,6 @@ def createSender():
             print("SMTP File Available. Would you like to import saved SMTP variables? Y/N:\t")
             use = input().lower()
         if use == 'y':
-            # smtpfile = pathlib.Path("Files\smtp.txt")
             with open(smtpfile, 'r') as file:
                 port = file.readline()
                 if port:
@@ -385,9 +379,7 @@ def addApiDetails(senderObj):
             print("Reddit API File Available. Would you like to import saved API variables? Y/N:\t")
             use = input().lower()
         if use == 'y':
-            # apifile = pathlib.Path("Files\\api.txt")
             with open(apiFile, 'r') as file:
-
                 apiPersonalUseScript = file.readline().rstrip('\n')
                 if apiPersonalUseScript:
                     print('Personal Use Script:' + apiPersonalUseScript)
@@ -450,7 +442,6 @@ def addApiDetails(senderObj):
     else:
         print("API File unavailable. Please enter API variables for email functionality.")
         addIt(senderObj)
-
 
 
 def saveSMTPFile(senderObject):
@@ -536,7 +527,6 @@ def main():
             for submission in subreddit.new(limit=5):
                 if sender.searchFor in submission.title.lower():
                     postWorth = int(re.findall('[0-9]+', submission.title)[0])
-                    # compare post worth and sender's limit
                     if submission.id not in postList:
                         postList.append(submission.id)
                         if (sender.status == 'SELLER' and postWorth > sender.limit) \
