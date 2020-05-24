@@ -37,6 +37,9 @@ class Person:
 
 
 class Sender(Person):
+    """
+    Used to carry email & API details, as well as information used to decide what to parse from Reddit
+    """
     def __init__(self, email='', pw='', port=None, address=None):
         self._pw = pw
         self._minOrMax = ''
@@ -161,6 +164,12 @@ class Sender(Person):
         self._content = content
 
     def sendMail(self, receiver, post):
+        """
+        Sends an email to a receiver given certain post content
+        :param receiver: Object containing email and name properties
+        :param post: Object containing a post title, permalink URL and regular URL
+        :return: None
+        """
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL(self.smtpAddress, self.sslPort, context=context) as server:
             server.login(self.email, self.pw)
@@ -195,6 +204,10 @@ class Sender(Person):
                 print(f'Email sent to {receiver.email}')
 
     def validateCredentials(self):
+        """
+        Validates sender email and password credentials, prompting user again if they are incorrect.
+        :return: None
+        """
         while not self.credentialsValid:  # to loop until a correct password is aqquired
             try:
                 self.email = input("\nWhat is your G-mail address")
@@ -203,7 +216,7 @@ class Sender(Person):
                 with smtplib.SMTP_SSL(self.smtpAddress, self.sslPort, context=context) as server:
                     server.login(self.email, self.pw)
                 self.credentialsValid = True  # sets to true if log in is successful
-            except:
+            except smtplib.SMTPAuthenticationError:
                 print('Incorrect Username or Password. Standby for reattempt...\n')
                 time.sleep(5)
         print("\nCredentials validated.\n")
@@ -214,12 +227,12 @@ class Receiver(Person):
 
 
 class Post:
-    def __init__(self, id, title, url, permalink, selftext, created):
-        self._id = id
+    def __init__(self, postId, title, url, permalink, selfTest, created):
+        self._id = postId
         self._title = title
         self._url = url
         self._permalink = permalink
-        self._selftext = selftext
+        self._selfText = selfTest
         self._created = created
         self._turnipLink = ''
 
@@ -228,8 +241,8 @@ class Post:
         return self._id
 
     @id.setter
-    def id(self, id):
-        self._id = id
+    def id(self, postId):
+        self._id = postId
 
     @property
     def title(self):
@@ -265,11 +278,11 @@ class Post:
 
     @property
     def selftext(self):
-        return self._selftext
+        return self._selfText
 
     @selftext.setter
     def selftext(self, selftext):
-        self._selftext = selftext
+        self._selfText = selftext
 
     @property  # the getter. modify what we have before returning
     def turnipLink(self):
@@ -357,17 +370,17 @@ def createSender():
 
 
 def addApiDetails(senderObj):
-    def addIt(senderObj):
-        senderObj.personalUseScript = input("Enter API Personal Use Script:")
-        senderObj.apiSecret = input("Enter API Secret:")
-        senderObj.apiUser = input("Enter API User:")
-        senderObj.apiPw = input("Enter API PW:")
-        senderObj.apiApp = input("Enter API App:")
-        apiSubreddit = input("Enter API Subreddit, or press ENTER to use Default (ACNHTurnips)")
-        if apiSubreddit:
-            senderObj.apiSubreddit = apiSubreddit
+    def addIt(sendObj):
+        sendObj.personalUseScript = input("Enter API Personal Use Script:")
+        sendObj.apiSecret = input("Enter API Secret:")
+        sendObj.apiUser = input("Enter API User:")
+        sendObj.apiPw = input("Enter API PW:")
+        sendObj.apiApp = input("Enter API App:")
+        apiUsesSubreddit = input("Enter API Subreddit, or press ENTER to use Default (ACNHTurnips)")
+        if apiUsesSubreddit:
+            sendObj.apiSubreddit = apiUsesSubreddit
         else:
-            senderObj.apiSubreddit = 'ACNHTurnips'
+            sendObj.apiSubreddit = 'ACNHTurnips'
 
     apiFile = pathlib.Path(API_FILE)
     if apiFile.exists():
@@ -522,6 +535,7 @@ def main():
     sender.limit = int(input(f'\nFinally, what is the {sender.minOrMax} amount you\'d like to {tmp} for?'))
     try:
         postList = []
+        startTime = time.time()
         while True:
             new = False
             for submission in subreddit.new(limit=5):
@@ -553,7 +567,7 @@ def main():
                                     startTime = time.time()
                                     sender.sendMail(receiver, post)
             if first:
-                print("\nParser initalized.\n")
+                print("\nParser initialized.\n")
                 first = False
                 startTime = time.time()
 
